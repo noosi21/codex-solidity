@@ -86,8 +86,24 @@ fi
 
 # ─── 8. OpenAI API Key ───
 echo -e "${CYAN}[8/8]${NC} Configuring LLM access..."
-if [ -z "$OPENAI_API_KEY" ]; then
-    echo -e "  ${YELLOW}OPENAI_API_KEY not set.${NC}"
+
+# Check if Codex CLI is already logged in — if so, no API key needed
+CODEX_LOGGED_IN=false
+if command -v codex &> /dev/null; then
+    # Codex CLI stores auth — if logged in, it handles API keys internally
+    if codex whoami &> /dev/null 2>&1; then
+        CODEX_LOGGED_IN=true
+        echo -e "  Codex CLI: ${GREEN}already logged in${NC} — API key managed by Codex CLI"
+    fi
+fi
+
+if [ "$CODEX_LOGGED_IN" = true ]; then
+    echo -e "  ${GREEN}No API key needed — Codex CLI handles authentication automatically${NC}"
+elif [ -z "$OPENAI_API_KEY" ]; then
+    echo -e "  ${YELLOW}OPENAI_API_KEY not set and Codex CLI not logged in.${NC}"
+    echo -e "  ${CYAN}Option 1:${NC} Login to Codex CLI (recommended):"
+    echo -e "    codex login"
+    echo -e "  ${CYAN}Option 2:${NC} Enter API key manually:"
     echo -ne "  Enter your OpenAI API key (or press Enter to skip): "
     read -r API_KEY
     if [ -n "$API_KEY" ]; then
@@ -95,7 +111,7 @@ if [ -z "$OPENAI_API_KEY" ]; then
         export OPENAI_API_KEY="$API_KEY"
         echo -e "  ${GREEN}API key saved to ~/.bashrc${NC}"
     else
-        echo -e "  ${YELLOW}Skipped — set OPENAI_API_KEY later to enable LLM reasoning${NC}"
+        echo -e "  ${YELLOW}Skipped — run 'codex login' or set OPENAI_API_KEY later${NC}"
     fi
 else
     echo -e "  OPENAI_API_KEY: ${GREEN}already set${NC}"
