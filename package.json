@@ -1,7 +1,7 @@
 {
   "name": "codex-solidity",
   "version": "1.0.0",
-  "description": "Codex CLI Agent for Smart Contract & Blockchain Protocol Audits — Impact-Driven Vulnerability Discovery",
+  "description": "Codex Solidity — Smart Contract & Protocol Audit CLI Agent with 34 skills (9 core + 9 Trail of Bits + 15 DeFi/Protocol + 1 gas optimization), MCP intelligence, agentic audit loop",
   "main": "bin/codex-sol.js",
   "bin": {
     "codex-solidity": "./bin/codex-sol.js"
@@ -10,7 +10,7 @@
     "start": "node bin/codex-sol.js",
     "test": "node bin/codex-sol.js --help"
   },
-  "keywords": ["solidity", "smart-contract", "audit", "blockchain", "defi", "security", "cli"],
+  "keywords": ["solidity", "smart-contract", "audit", "blockchain", "defi", "security", "cli", "trail-of-bits", "erc4626", "reentrancy", "mcp", "bug-bounty"],
   "author": "Thabiso Noosi",
   "license": "MIT",
   "dependencies": {
