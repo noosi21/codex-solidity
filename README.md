@@ -9,11 +9,20 @@ Impact-driven vulnerability discovery for Solidity smart contracts and DeFi prot
 cd codex-solidity
 npm install
 
-# Audit a single contract
+# Audit a local contract
 node bin/codex-sol.js audit -t ./contracts/Vault.sol
 
-# Audit an entire project
+# Audit a local project
 node bin/codex-sol.js audit -t ./contracts/
+
+# Audit a GitHub repo directly (just provide the link!)
+node bin/codex-sol.js audit -t https://github.com/OpenZeppelin/openzeppelin-contracts
+
+# Audit a GitHub subdirectory
+node bin/codex-sol.js audit -t https://github.com/Aave/aave-v3-core/tree/main/contracts
+
+# Audit with GPT-5.4 xhigh deep reasoning
+node bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh
 
 # Run a single skill
 node bin/codex-sol.js skill -t ./Vault.sol -n reentrancy
@@ -33,6 +42,85 @@ node bin/codex-sol.js mcp -q reentrancy -s swc
 # Show agent configuration
 node bin/codex-sol.js config
 ```
+
+## 🐉 Kali Linux Setup
+
+One-command setup on Kali Linux:
+
+```bash
+git clone https://github.com/noosi21/codex-solidity.git
+cd codex-solidity
+chmod +x setup-kali.sh
+./setup-kali.sh
+```
+
+This installs:
+- **Node.js 20.x** + npm
+- **Foundry** (forge, cast, anvil) — for PoC compilation/testing
+- **Slither** — Python static analyzer
+- **Echidna** — property-based fuzzer
+- **Codex Solidity** + all npm dependencies
+- **OpenAI API key** configuration (prompts for key)
+
+After setup, audit any smart contract from GitHub:
+
+```bash
+# Just provide the GitHub link — no manual cloning needed
+node ~/codex-solidity/bin/codex-sol.js audit -t https://github.com/Uniswap/v3-core --llm --reasoning-effort xhigh
+```
+
+## 🤖 LLM Integration (GPT-5.4 xhigh)
+
+### Setup
+
+```bash
+# Set your OpenAI API key
+export OPENAI_API_KEY="sk-..."
+
+# Or pass it inline
+node bin/codex-sol.js audit -t ./contracts/ --llm --api-key "sk-..."
+```
+
+### What LLM Reasoning Adds
+
+| Feature | Without LLM | With GPT-5.4 xhigh |
+|---------|-------------|---------------------|
+| Finding validation | Static rules only | LLM confirms true positives, dismisses false positives |
+| False positive reduction | None | LLM reviews each critical/high finding |
+| Audit synthesis | Raw findings list | Coherent narrative with attack trees + exploit paths |
+| Cross-contract reasoning | Pattern matching | Deep logic analysis across contract interactions |
+| Novel exploit detection | Known patterns only | LLM identifies novel vulnerability patterns |
+| PoC generation | Template-based | LLM generates context-aware exploit contracts |
+
+### Reasoning Effort Levels
+
+| Level | Speed | Use Case |
+|-------|-------|----------|
+| `low` | ~5s/finding | Quick triage |
+| `medium` | ~15s/finding | Standard audit |
+| `high` | ~30s/finding | DeFi protocols (default) |
+| `xhigh` | ~60s/finding | Complex multi-contract, novel exploits, $1M+ TVL |
+
+### Example
+
+```bash
+# Full audit with maximum reasoning
+node bin/codex-sol.js audit -t https://github.com/Aave/aave-v3-core \
+  --llm \
+  --llm-model gpt-5.4-pro \
+  --reasoning-effort xhigh \
+  --network mainnet
+```
+
+This produces:
+1. **34 skills** → static findings
+2. **Symbolic execution** → taint + data-flow findings
+3. **Invariant checker** → formal invariant violations
+4. **Cross-contract analyzer** → multi-file reentrancy chains
+5. **LLM validation** → true positives confirmed, false positives dismissed
+6. **LLM synthesis** → `llm-synthesis.md` with attack trees + recommendations
+7. **Foundry PoCs** → runnable `.t.sol` exploit tests
+8. **Fuzzing harnesses** → Echidna + Medusa configs
 
 ## 📋 Skills (34 Impact-Driven Modules)
 
@@ -128,6 +216,8 @@ codex-solidity/
 │   ├── invariant-checker.js   # Formal invariant verification (access, accounting, reentrancy)
 │   ├── shared-state.js        # Cross-skill shared state: skills read each other's findings in real-time
 │   ├── cross-contract-analyzer.js # Multi-file reentrancy chains, composability, state deps
+│   ├── llm-reasoner.js       # GPT-5.4 xhigh: finding validation, audit synthesis, exploit PoC
+│   ├── github-fetcher.js     # Fetch contracts from GitHub URLs (repo/tree/blob/raw)
 │   └── report-generator.js    # HTML (dark) + Markdown + JSON reports
 ├── skills/
 │   ├── reentrancy/index.js    # Reentrancy — recursive callback fund drain

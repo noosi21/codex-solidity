@@ -72,3 +72,44 @@ Every finding must include:
 3. **Impact**: Quantified financial impact and affected users
 4. **Proof of Concept**: Standalone exploit code or attack flow
 5. **Recommended Mitigation**: Step-by-step fix with code examples
+
+## Codex CLI Integration (GPT-5.4 xhigh)
+
+### How It Works
+When `--llm` flag is set and `OPENAI_API_KEY` is available:
+1. **Static analysis runs first** (Phase 1-2B): AST parsing, 34 skills, symbolic execution, invariant checking, cross-contract analysis
+2. **LLM validates findings** (Phase 2C): GPT-5.4 xhigh reviews each critical/high finding — confirms true positives, dismisses false positives, escalates compound vulnerabilities
+3. **LLM generates audit synthesis**: Combines all findings into a coherent narrative with attack trees, exploit paths, and prioritized recommendations
+
+### Reasoning Effort Levels
+- `low`: Quick validation, ~5s per finding
+- `medium`: Standard analysis, ~15s per finding
+- `high`: Deep reasoning, ~30s per finding (default)
+- `xhigh`: Maximum thinking tokens, ~60s per finding — for complex DeFi logic, cross-contract chains, and novel exploit patterns
+
+### When to Use xhigh
+- Multi-contract DeFi protocols (vaults, routers, oracles)
+- Novel exploit patterns not in SWC Registry
+- Cross-contract reentrancy chains
+- Economic attack analysis (flash loan + oracle + AMM math)
+- Any audit where fund exposure > $1M
+
+### GitHub URL Targets
+You can audit any public GitHub repo directly:
+```bash
+# Full repo
+codex-sol audit -t https://github.com/OpenZeppelin/openzeppelin-contracts --llm
+
+# Subdirectory only
+codex-sol audit -t https://github.com/Aave/aave-v3-core/tree/main/contracts --llm
+
+# Single file
+codex-sol audit -t https://github.com/Uniswap/v3-core/blob/main/contracts/UniswapV3Pool.sol --llm
+```
+
+The agent will:
+1. Clone/fetch the contracts from GitHub
+2. Parse and analyze them locally
+3. Run all 34 skills + advanced analysis
+4. Validate with GPT-5.4 xhigh
+5. Generate reports + Foundry PoCs + fuzzing harnesses

@@ -34,7 +34,7 @@ program
 program
   .command('audit')
   .description('Run full audit on a Solidity project or contract file')
-  .requiredOption('-t, --target <path>', 'Path to Solidity file or project directory')
+  .requiredOption('-t, --target <path>', 'Path to .sol file, directory, or GitHub URL (e.g. https://github.com/org/repo)')
   .option('-s, --skills <list>', 'Comma-separated skills to run (default: all)', 'all')
   .option('-o, --output <dir>', 'Output directory for reports', './audit-reports')
   .option('-c, --config <path>', 'Path to config YAML', path.join(__dirname, '..', 'config', 'default.yaml'))
@@ -45,6 +45,10 @@ program
   .option('--fail-on <severity>', 'CI fail threshold: critical, high, medium, low', 'high')
   .option('--diff <ref>', 'Diff mode: only audit changed functions (e.g. main...HEAD)')
   .option('--interactive', 'Interactive REPL mode: drill into findings after audit')
+  .option('--llm', 'Enable LLM reasoning (GPT-5.4 xhigh) for deep analysis')
+  .option('--llm-model <model>', 'LLM model to use (default: gpt-4o, use gpt-5.4-pro when available)', '')
+  .option('--reasoning-effort <level>', 'Reasoning effort: low, medium, high, xhigh (default: high)', 'high')
+  .option('--api-key <key>', 'OpenAI API key (or set OPENAI_API_KEY env var)', '')
   .action(async (opts) => {
     console.log(BANNER);
     const agent = new Agent(opts);
