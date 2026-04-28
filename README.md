@@ -26,6 +26,12 @@ node bin/codex-sol.js list
 
 # Generate report from previous audit
 node bin/codex-sol.js report -i ./audit-reports/audit-2026-04-28.json -f html
+
+# Query SWC Registry for known vulnerabilities
+node bin/codex-sol.js mcp -q reentrancy -s swc
+
+# Show agent configuration
+node bin/codex-sol.js config
 ```
 
 ## 📋 Skills (34 Impact-Driven Modules)
@@ -109,6 +115,7 @@ codex-solidity/
 │   ├── parser.js              # Solidity regex parser (contracts, functions, state vars, events)
 │   ├── skill-loader.js        # Auto-discovers skills from /skills
 │   ├── impact-engine.js       # Calculates drain amounts, generates exploit contracts
+│   ├── mcp.js                 # MCP: SWC Registry + DeFiLlama intelligence
 │   └── report-generator.js    # HTML (dark) + Markdown + JSON reports
 ├── skills/
 │   ├── reentrancy/index.js    # Reentrancy — recursive callback fund drain
@@ -147,10 +154,8 @@ codex-solidity/
 │   ├── token-uri-manipulation/index.js # SVG XSS & metadata manipulation
 │   ├── soulbound-bypass/index.js   # SBT transfer restriction bypass
 │   ├── l2-sequencer/index.js        # L2 sequencer downtime oracle freeze
-│   └── gas-griefing/index.js        # Gas DOS & external call in loop
-│   └── gas-optimization/index.js  # Gas optimization reveals hidden logic flaws
-├── lib/
-│   ├── mcp.js                   # MCP: SWC Registry + DeFiLlama intelligence
+│   ├── gas-griefing/index.js        # Gas DOS & external call in loop
+│   └── gas-optimization/index.js    # Gas optimization reveals hidden logic flaws
 ├── .agents/skills/audit-pro/
 │   ├── SKILL.md                  # Audit workflow: recon → analysis → PoC → report
 │   ├── scripts/static_scan.sh    # Bridge to Slither/Aderyn/Codex
