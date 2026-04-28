@@ -28,7 +28,7 @@ node bin/codex-sol.js list
 node bin/codex-sol.js report -i ./audit-reports/audit-2026-04-28.json -f html
 ```
 
-## 📋 Skills (18 Impact-Driven Modules)
+## 📋 Skills (33 Impact-Driven Modules)
 
 ### Core DeFi/Protocol Skills
 
@@ -57,6 +57,26 @@ node bin/codex-sol.js report -i ./audit-reports/audit-2026-04-28.json -f html
 | **storage-pointer** | High | Uninitialized storage var points to slot 0 → overwrites owner address |
 | **inheritance-order** | High | C3 linearization: rightmost parent overrides → wrong function dispatched |
 | **assembly-issues** | High | Hardcoded sstore(0, x) overwrites owner, extcodesize bypass, memory corruption |
+
+### DeFi/Protocol Skills
+
+| Skill | Severity | Impact Demonstration |
+|-------|----------|---------------------|
+| **erc4626-vault** | Critical | Inflation attack: donate ETH → inflate share price → victim gets 0 shares → total loss |
+| **read-only-reentrancy** | Critical | View function returns stale data during callback → oracle reads wrong value → $100M+ losses |
+| **rounding-errors** | High | Division before multiplication → precision loss → attacker extracts dust per tx |
+| **liquidation-attack** | High | No grace period → MEV flash-loan liquidation → borrowers instantly liquidated |
+| **proxy-upgrade** | Critical | Uninitialized implementation → anyone calls initialize() → contract takeover |
+| **amm-math** | High | No k-invariant check → swap drains reserves without maintaining constant product |
+| **reward-manipulation** | High | Stake/claim/unstake loop → drain rewards without time commitment |
+| **bridge-vulnerability** | Critical | No message ID tracking → replay same message → drain bridge liquidity twice |
+| **donation-attack** | High | Direct token transfer inflates share price → victim deposits, gets 0 shares |
+| **eip-2612-permit** | High | No chain ID in domain → permit replay across L2s → tokens stolen on other chains |
+| **nft-reentrancy** | High | onERC721Received callback re-enters during safeTransferFrom → bypasses ETH guards |
+| **token-uri-manipulation** | Medium | SVG XSS in on-chain NFT → steals marketplace user cookies |
+| **soulbound-bypass** | Medium | safeTransferFrom not blocked → "non-transferable" SBT actually transferable |
+| **l2-sequencer** | High | Sequencer downtime → Chainlink freezes → borrow against stale price → drain pool |
+| **gas-griefing** | Medium | External call in loop → grow array past gas limit → permanent DOS |
 
 ## 🎯 Core Impact Scenarios
 
@@ -110,6 +130,23 @@ codex-solidity/
 │   ├── storage-pointer/index.js    # Uninitialized storage pointers
 │   ├── inheritance-order/index.js  # C3 linearization & missing super calls
 │   └── assembly-issues/index.js    # Inline assembly vulnerabilities
+│   │
+│   │  # DeFi/Protocol skills
+│   ├── erc4626-vault/index.js       # ERC4626 vault inflation/rounding attacks
+│   ├── read-only-reentrancy/index.js # Read-only reentrancy via view functions
+│   ├── rounding-errors/index.js     # Division-before-multiplication precision loss
+│   ├── liquidation-attack/index.js  # Cascade liquidation & MEV front-running
+│   ├── proxy-upgrade/index.js       # UUPS/Transparent proxy vulnerabilities
+│   ├── amm-math/index.js            # AMM constant product invariant violations
+│   ├── reward-manipulation/index.js # Staking reward gaming & double claims
+│   ├── bridge-vulnerability/index.js # Cross-chain message replay & validator attacks
+│   ├── donation-attack/index.js     # Direct transfer inflation attack
+│   ├── eip-2612-permit/index.js     # Permit replay & signature validation
+│   ├── nft-reentrancy/index.js      # ERC721/ERC1155 callback reentrancy
+│   ├── token-uri-manipulation/index.js # SVG XSS & metadata manipulation
+│   ├── soulbound-bypass/index.js   # SBT transfer restriction bypass
+│   ├── l2-sequencer/index.js        # L2 sequencer downtime oracle freeze
+│   └── gas-griefing/index.js        # Gas DOS & external call in loop
 ├── config/default.yaml
 ├── package.json
 └── README.md

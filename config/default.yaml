@@ -37,6 +37,22 @@ skills:
   storage-pointer: true
   inheritance-order: true
   assembly-issues: true
+  # DeFi/Protocol skills
+  erc4626-vault: true
+  read-only-reentrancy: true
+  rounding-errors: true
+  liquidation-attack: true
+  proxy-upgrade: true
+  amm-math: true
+  reward-manipulation: true
+  bridge-vulnerability: true
+  donation-attack: true
+  eip-2612-permit: true
+  nft-reentrancy: true
+  token-uri-manipulation: true
+  soulbound-bypass: true
+  l2-sequencer: true
+  gas-griefing: true
 
 reporting:
   formats:
