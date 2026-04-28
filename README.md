@@ -4,46 +4,108 @@
 
 ## 🚀 Quick Start
 
-### Option A: Interactive (Easiest)
+### Option A: Interactive (Easiest — 3 Steps)
 ```bash
+# Step 1: Clone and install
 git clone https://github.com/noosi21/codex-solidity.git
 cd codex-solidity
 npm install
-npm run quickstart        # Interactive menu — just pick what to audit
+
+# Step 2: Run interactive quickstart
+npm run quickstart
+
+# Step 3: Pick what to audit from the menu:
+#   1) GitHub repo URL → paste any repo link
+#   2) Local directory → ./contracts/
+#   3) Single .sol file → ./Vault.sol
+#   4) List all 35 skills
+#   5) Start Codex CLI session
 ```
 
-### Option B: One-Liner
+### Option B: One-Liner (No Clone Needed)
 ```bash
-# Audit any GitHub repo (just paste the link)
+# Audit any GitHub repo — just paste the link
 npx codex-solidity audit -t https://github.com/OpenZeppelin/openzeppelin-contracts
 
-# Or install globally for shorter commands
+# Audit a subdirectory
+npx codex-solidity audit -t https://github.com/Aave/aave-v3-core/tree/main/contracts
+
+# Audit local contracts
+npx codex-solidity audit -t ./contracts/
+```
+
+### Option C: Global Install (Short Commands)
+```bash
+# Install once
 npm install -g codex-solidity
-codex-sol audit -t https://github.com/Aave/aave-v3-core --aggressive
+
+# Now use 'codex-sol' from anywhere
+codex-sol audit -t https://github.com/org/repo          # Full audit
+codex-sol audit -t ./contracts/ --llm                   # + GPT-5.4 reasoning
+codex-sol audit -t https://github.com/org/repo --aggressive --llm --reasoning-effort xhigh  # Full power
+codex-sol skill -t ./Vault.sol -n reentrancy            # Single skill
+codex-sol list                                           # List 35 skills
+codex-sol parse -t ./Vault.sol                           # Parse structure
+codex-sol mcp -q reentrancy -s swc                      # Query SWC Registry
+codex-sol config                                         # Show config
 ```
 
-### Option C: Docker (Zero Install)
+### Option D: Docker (Zero Install)
 ```bash
+# Pull and run — nothing to install locally
 docker run -it noosi21/codex-solidity audit -t https://github.com/org/repo
+
+# With LLM reasoning
+docker run -it -e OPENAI_API_KEY=sk-... noosi21/codex-solidity audit -t https://github.com/org/repo --llm
+
+# Build locally
+git clone https://github.com/noosi21/codex-solidity.git
+cd codex-solidity
+docker build -t codex-solidity .
+docker run -it codex-solidity audit -t https://github.com/org/repo
 ```
 
-### Option D: Codex CLI (GPT-5.4 xhigh Agent)
+### Option E: Codex CLI (GPT-5.4 xhigh Agent)
 ```bash
+# Install Codex CLI
 npm install -g @openai/codex
+
+# Login (one time — handles API keys automatically)
 codex login
-cd codex-solidity && codex
-> audit https://github.com/org/repo for bug bounty
+
+# Start session inside the repo
+cd codex-solidity
+codex
+
+# Now just tell it what to do in plain English:
+> audit https://github.com/Aave/aave-v3-core for bug bounty
+> aggressively audit this repo — prove every exploit
+> check ./contracts/Vault.sol for reentrancy
+> run all 35 skills on this codebase
+> what are the most critical findings?
 ```
 
-### All CLI Commands
+### Common Usage Examples
 ```bash
-codex-sol audit -t <path_or_url>     # Full audit (aggressive by default)
-codex-sol audit -t <url> --llm       # + GPT-5.4 xhigh reasoning
-codex-sol skill -t <path> -n <name>  # Run one skill
-codex-sol list                        # List all 35 skills
-codex-sol parse -t <path>            # Parse contract structure
-codex-sol mcp -q reentrancy -s swc   # Query SWC Registry
-codex-sol config                      # Show agent config
+# Bug bounty audit (full power)
+codex-sol audit -t https://github.com/org/repo --aggressive --llm --reasoning-effort xhigh
+
+# Quick scan (no LLM, fast)
+codex-sol audit -t ./contracts/
+
+# Focus on one vulnerability type
+codex-sol skill -t ./Vault.sol -n reentrancy
+codex-sol skill -t ./Vault.sol -n flash-loan
+codex-sol skill -t ./Vault.sol -n upgradability
+
+# CI/CD integration
+codex-sol audit -t ./contracts/ --ci --fail-on high
+
+# Diff audit (only changed code)
+codex-sol audit -t ./contracts/ --diff main...HEAD
+
+# Interactive mode (drill into findings after audit)
+codex-sol audit -t ./contracts/ --interactive
 ```
 
 ## 🐉 Kali Linux Setup
