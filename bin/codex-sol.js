@@ -8,6 +8,7 @@ const Agent = require('../lib/agent');
 const SkillLoader = require('../lib/skill-loader');
 const ReportGenerator = require('../lib/report-generator');
 const Parser = require('../lib/parser');
+const { SWCRegistry, DeFiLlamaClient } = require('../lib/mcp');
 
 const BANNER = `
 ${chalk.cyan.bold(`
@@ -99,6 +100,81 @@ program
   .action(async (opts) => {
     const reporter = new ReportGenerator(opts);
     await reporter.generate();
+  });
+
+program
+  .command('mcp')
+  .description('Query external intelligence sources (SWC Registry, DeFiLlama)')
+  .requiredOption('-q, --query <query>', 'Search query (e.g. "reentrancy", protocol name)')
+  .option('-s, --source <source>', 'Source: swc, defillama, all', 'all')
+  .action(async (opts) => {
+    console.log(BANNER);
+    console.log(chalk.cyan.bold('\n🔍 MCP Intelligence Lookup\n'));
+
+    if (opts.source === 'all' || opts.source === 'swc') {
+      const swc = new SWCRegistry();
+      const results = swc.lookup(opts.query);
+      if (results.length > 0) {
+        console.log(chalk.yellow.bold('SWC Registry Results:'));
+        for (const r of results) {
+          console.log(`  ${chalk.green(r.id)} ${r.name} [${r.severity}]`);
+          console.log(`  ${chalk.gray(r.url)}`);
+        }
+      } else {
+        console.log(chalk.yellow('  No SWC results found.'));
+      }
+      console.log();
+    }
+
+    if (opts.source === 'all' || opts.source === 'defillama') {
+      const llama = new DeFiLlamaClient();
+      try {
+        const exploits = await llama.getExploits();
+        const relevant = (exploits || []).filter(e =>
+          (e.name || '').toLowerCase().includes(opts.query.toLowerCase()) ||
+          (e.protocol || '').toLowerCase().includes(opts.query.toLowerCase())
+        );
+        if (relevant.length > 0) {
+          console.log(chalk.yellow.bold('DeFiLlama Exploit History:'));
+          for (const e of relevant.slice(0, 10)) {
+            console.log(`  ${chalk.red('$' + (e.amount || '?'))} ${e.name || e.protocol} — ${e.chain || ''}`);
+          }
+        } else {
+          console.log(chalk.yellow('  No DeFiLlama exploit results found.'));
+        }
+      } catch {
+        console.log(chalk.yellow('  DeFiLlama lookup unavailable (offline mode).'));
+      }
+      console.log();
+    }
+  });
+
+program
+  .command('config')
+  .description('Show current agent configuration (config.toml + AGENTS.md)')
+  .action(() => {
+    console.log(BANNER);
+    console.log(chalk.cyan.bold('\n⚙️  Agent Configuration\n'));
+
+    // config.toml
+    const configPath = path.join(__dirname, '..', 'config.toml');
+    if (fs.existsSync(configPath)) {
+      console.log(chalk.yellow.bold('config.toml:'));
+      console.log(chalk.gray(fs.readFileSync(configPath, 'utf8')));
+    } else {
+      console.log(chalk.yellow('  No config.toml found.'));
+    }
+
+    // AGENTS.md
+    const agentsPath = path.join(__dirname, '..', 'AGENTS.md');
+    if (fs.existsSync(agentsPath)) {
+      console.log(chalk.yellow.bold('\nAGENTS.md (Durable Instructions):'));
+      const content = fs.readFileSync(agentsPath, 'utf8');
+      console.log(chalk.gray(content.substring(0, 500) + (content.length > 500 ? '...' : '')));
+    } else {
+      console.log(chalk.yellow('  No AGENTS.md found.'));
+    }
+    console.log();
   });
 
 program.parse();

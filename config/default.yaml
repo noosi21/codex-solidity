@@ -53,6 +53,8 @@ skills:
   soulbound-bypass: true
   l2-sequencer: true
   gas-griefing: true
+  # Optimization skills
+  gas-optimization: true
 
 reporting:
   formats:

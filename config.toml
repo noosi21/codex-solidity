@@ -1,0 +1,62 @@
+# Codex Solidity — Agent Configuration
+# Professional-grade smart contract audit workstation
+
+[model]
+default = "gpt-5.4-pro"
+reasoning_effort = "xhigh"
+max_completion_tokens = 100000
+
+[features]
+enable_subagents = true
+enable_mcp = true
+sandbox = "relaxed"
+
+[audit]
+# Focus on critical/high severity logic flaws
+min_severity = "medium"
+# Auto-generate PoC for every high/critical finding
+auto_poc = true
+# Run static analysis before manual review
+static_analysis_first = true
+# Generate submission-ready reports (Sherlock/Immunefi format)
+submission_reports = true
+
+[audit.targets]
+# Prioritize these vulnerability categories
+priority_categories = [
+  "reentrancy",
+  "access-control",
+  "overflow",
+  "flash-loan",
+  "read-only-reentrancy",
+  "erc4626-vault",
+  "bridge-vulnerability",
+  "proxy-upgrade",
+  "oracle-manipulation",
+  "liquidation-attack",
+]
+
+[audit.invariant]
+# Break invariants = critical findings
+check_invariants = true
+invariant_checks = [
+  "totalSupply == sum of all balances",
+  "contract_balance >= total_deposits - total_withdrawals",
+  "only_owner_can_call_restricted_functions",
+  "shares_are_always_backed_by_assets",
+  "no_double_claim_of_rewards",
+  "oracle_price_within_deviation_threshold",
+]
+
+[mcp]
+# External intelligence sources
+servers = [
+  { name = "swc-registry", url = "https://mcp.agent-tools.com/security" },
+  { name = "defillama", url = "https://mcp.agent-tools.com/defillama" },
+]
+
+[reporting]
+formats = ["html", "md", "json"]
+output_dir = "./audit-reports"
+# Sherlock/Immunefi compatible reports
+bug_bounty_format = true

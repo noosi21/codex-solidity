@@ -28,7 +28,7 @@ node bin/codex-sol.js list
 node bin/codex-sol.js report -i ./audit-reports/audit-2026-04-28.json -f html
 ```
 
-## 📋 Skills (33 Impact-Driven Modules)
+## 📋 Skills (34 Impact-Driven Modules)
 
 ### Core DeFi/Protocol Skills
 
@@ -77,6 +77,7 @@ node bin/codex-sol.js report -i ./audit-reports/audit-2026-04-28.json -f html
 | **soulbound-bypass** | Medium | safeTransferFrom not blocked → "non-transferable" SBT actually transferable |
 | **l2-sequencer** | High | Sequencer downtime → Chainlink freezes → borrow against stale price → drain pool |
 | **gas-griefing** | Medium | External call in loop → grow array past gas limit → permanent DOS |
+| **gas-optimization** | Low | Storage reads in loops → gas waste AND hidden logic flaw when loop modifies same variable |
 
 ## 🎯 Core Impact Scenarios
 
@@ -147,6 +148,15 @@ codex-solidity/
 │   ├── soulbound-bypass/index.js   # SBT transfer restriction bypass
 │   ├── l2-sequencer/index.js        # L2 sequencer downtime oracle freeze
 │   └── gas-griefing/index.js        # Gas DOS & external call in loop
+│   └── gas-optimization/index.js  # Gas optimization reveals hidden logic flaws
+├── lib/
+│   ├── mcp.js                   # MCP: SWC Registry + DeFiLlama intelligence
+├── .agents/skills/audit-pro/
+│   ├── SKILL.md                  # Audit workflow: recon → analysis → PoC → report
+│   ├── scripts/static_scan.sh    # Bridge to Slither/Aderyn/Codex
+│   └── references/report_template.md  # Sherlock/Immunefi submission template
+├── config.toml                  # Agent config: model, reasoning_effort, MCP servers
+├── AGENTS.md                    # Durable auditor persona instructions
 ├── config/default.yaml
 ├── package.json
 └── README.md
@@ -161,7 +171,48 @@ audit  -t, --target <path>     Path to .sol file or directory (required)
        --compiler <version>    Solidity version (default: 0.8.19)
        --network <name>        Network context (default: mainnet)
        --exclude <list>        Paths to exclude
+
+mcp    -q, --query <query>     Search SWC Registry / DeFiLlama for known exploits
+       -s, --source <source>   Source: swc, defillama, all (default: all)
+
+config                           Show current agent config (config.toml + AGENTS.md)
 ```
+
+## 🧠 Agentic Audit Loop
+
+### config.toml — The Engine
+```toml
+[model]
+default = "gpt-5.4-pro"
+reasoning_effort = "xhigh"       # Maximum thinking tokens for complex logic
+max_completion_tokens = 100000
+
+[features]
+enable_subagents = true          # Parallel contract module analysis
+enable_mcp = true                # External intelligence lookup
+sandbox = "relaxed"              # Run local tests to verify PoCs
+
+[audit]
+auto_poc = true                  # Auto-generate PoC for every high/critical finding
+submission_reports = true        # Sherlock/Immunefi format reports
+```
+
+### AGENTS.md — The Brain
+Durable instructions that persist across sessions:
+- **Auditor Persona**: Lead Security Researcher mindset, invariant-breaking focus
+- **Operational Rules**: Static analysis first, PoC or it didn't happen, impact quantification
+- **Attack Path Priority**: Fund drain → Pool freeze → Withdraw more than deposit → Privilege escalation → Cross-protocol impact
+- **Severity Classification**: Based on quantified financial impact
+
+### MCP — External Intelligence
+- **SWC Registry**: Look up known Solidity vulnerability patterns (SWC-101 through SWC-138)
+- **DeFiLlama**: Protocol TVL, exploit history, protocol-specific context
+- Query: `node bin/codex-sol.js mcp -q reentrancy -s swc`
+
+### .agents/skills/audit-pro/ — The Toolkit
+- **SKILL.md**: 6-step audit workflow (Recon → Static Analysis → Deep Skill Analysis → PoC → Report → Gas Review)
+- **scripts/static_scan.sh**: Bridges Codex with Slither, Aderyn, and custom patterns
+- **references/report_template.md**: Sherlock/Immunefi submission-ready template
 
 ## 🔧 Adding Custom Skills
 
