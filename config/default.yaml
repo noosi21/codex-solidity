@@ -1,0 +1,63 @@
+# Codex Solidity - Default Configuration
+
+target:
+  # Path to Solidity file or project directory
+  # path: ./contracts
+
+compiler:
+  # Solidity compiler version
+  version: "0.8.19"
+  # Enable optimizations
+  optimize: true
+  # Optimization runs
+  runs: 200
+
+network:
+  # Target network context (mainnet, goerli, arbitrum, optimism, fork)
+  name: mainnet
+
+skills:
+  # Core DeFi/Protocol skills
+  reentrancy: true
+  flash-loan: true
+  access-control: true
+  overflow: true
+  pool-freeze: true
+  oracle-manipulation: true
+  front-running: true
+  delegatecall: true
+  self-destruct: true
+  # Trail of Bits skills
+  unchecked-returns: true
+  shadowing: true
+  pragma-bugs: true
+  signature-malleability: true
+  erc20-assumptions: true
+  timestamp-dependence: true
+  storage-pointer: true
+  inheritance-order: true
+  assembly-issues: true
+
+reporting:
+  formats:
+    - html
+    - md
+    - json
+  output_dir: ./audit-reports
+
+# Scope
+scope:
+  # Only audit these contracts (empty = all)
+  include: []
+  # Skip these contracts
+  exclude:
+    - "mock_*"
+    - "test_*"
+    - "script_*"
+
+# Impact estimation
+impact:
+  # Assume pool size for drain calculations (in ETH)
+  default_pool_size_eth: 100
+  # Flash loan borrow amount assumption
+  flash_loan_amount_eth: 10000

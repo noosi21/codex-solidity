@@ -1,0 +1,23 @@
+{
+  "name": "codex-solidity",
+  "version": "1.0.0",
+  "description": "Codex CLI Agent for Smart Contract & Blockchain Protocol Audits — Impact-Driven Vulnerability Discovery",
+  "main": "bin/codex-sol.js",
+  "bin": {
+    "codex-solidity": "./bin/codex-sol.js"
+  },
+  "scripts": {
+    "start": "node bin/codex-sol.js",
+    "test": "node bin/codex-sol.js --help"
+  },
+  "keywords": ["solidity", "smart-contract", "audit", "blockchain", "defi", "security", "cli"],
+  "author": "Thabiso Noosi",
+  "license": "MIT",
+  "dependencies": {
+    "chalk": "^4.1.2",
+    "commander": "^11.1.0",
+    "glob": "^10.3.10",
+    "js-yaml": "^4.1.0",
+    "ora": "^5.4.1"
+  }
+}
