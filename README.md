@@ -4,40 +4,46 @@
 
 ## 🚀 Quick Start
 
+### Option A: Interactive (Easiest)
 ```bash
-# Install dependencies
+git clone https://github.com/noosi21/codex-solidity.git
 cd codex-solidity
 npm install
+npm run quickstart        # Interactive menu — just pick what to audit
+```
 
-# 🔴 Aggressive audit — prove every bug with exploit code
-node bin/codex-sol.js audit -t ./contracts/ --aggressive
+### Option B: One-Liner
+```bash
+# Audit any GitHub repo (just paste the link)
+npx codex-solidity audit -t https://github.com/OpenZeppelin/openzeppelin-contracts
 
-# Audit a GitHub repo directly (just provide the link!)
-node bin/codex-sol.js audit -t https://github.com/OpenZeppelin/openzeppelin-contracts --aggressive
+# Or install globally for shorter commands
+npm install -g codex-solidity
+codex-sol audit -t https://github.com/Aave/aave-v3-core --aggressive
+```
 
-# Audit a GitHub subdirectory
-node bin/codex-sol.js audit -t https://github.com/Aave/aave-v3-core/tree/main/contracts --aggressive
+### Option C: Docker (Zero Install)
+```bash
+docker run -it noosi21/codex-solidity audit -t https://github.com/org/repo
+```
 
-# 🔴 Full power: aggressive + GPT-5.4 xhigh reasoning
-node bin/codex-sol.js audit -t https://github.com/org/repo --aggressive --llm --reasoning-effort xhigh
+### Option D: Codex CLI (GPT-5.4 xhigh Agent)
+```bash
+npm install -g @openai/codex
+codex login
+cd codex-solidity && codex
+> audit https://github.com/org/repo for bug bounty
+```
 
-# Run a single skill
-node bin/codex-sol.js skill -t ./Vault.sol -n reentrancy
-
-# Parse contract structure
-node bin/codex-sol.js parse -t ./Vault.sol
-
-# List available skills
-node bin/codex-sol.js list
-
-# Generate report from previous audit
-node bin/codex-sol.js report -i ./audit-reports/audit-2026-04-28.json -f html
-
-# Query SWC Registry for known vulnerabilities
-node bin/codex-sol.js mcp -q reentrancy -s swc
-
-# Show agent configuration
-node bin/codex-sol.js config
+### All CLI Commands
+```bash
+codex-sol audit -t <path_or_url>     # Full audit (aggressive by default)
+codex-sol audit -t <url> --llm       # + GPT-5.4 xhigh reasoning
+codex-sol skill -t <path> -n <name>  # Run one skill
+codex-sol list                        # List all 35 skills
+codex-sol parse -t <path>            # Parse contract structure
+codex-sol mcp -q reentrancy -s swc   # Query SWC Registry
+codex-sol config                      # Show agent config
 ```
 
 ## 🐉 Kali Linux Setup

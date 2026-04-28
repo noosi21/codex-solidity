@@ -4,11 +4,14 @@
   "description": "Codex Solidity — Smart Contract & Protocol Audit CLI Agent with 34 skills (9 core + 9 Trail of Bits + 15 DeFi/Protocol + 1 gas optimization), MCP intelligence, agentic audit loop",
   "main": "bin/codex-sol.js",
   "bin": {
-    "codex-solidity": "./bin/codex-sol.js"
+    "codex-solidity": "./bin/codex-sol.js",
+    "codex-sol": "./bin/codex-sol.js"
   },
   "scripts": {
     "start": "node bin/codex-sol.js",
-    "test": "node bin/codex-sol.js --help"
+    "audit": "node bin/codex-sol.js audit",
+    "test": "node bin/codex-sol.js --help",
+    "quickstart": "bash quickstart.sh"
   },
   "keywords": [
     "solidity",
