@@ -1,6 +1,6 @@
-# ⛓️ Codex Solidity — Smart Contract & Protocol Audit Agent
+# ⛓️ Codex Solidity — Aggressive Smart Contract Audit Agent
 
-Impact-driven vulnerability discovery for Solidity smart contracts and DeFi protocols. Every finding includes **exploit contracts**, **attack flow**, and **financial impact calculations** proving real fund drain, pool freeze, and balance manipulation scenarios.
+🔴 **RED TEAM** vulnerability discovery for Solidity smart contracts and DeFi protocols. Doesn't just find bugs — **proves them with exploit code**, chains low-severity findings into critical attacks, and breaks invariants before hackers do. Every finding includes **exploit contracts**, **attack flow**, and **financial impact calculations** proving real fund drain, pool freeze, and balance manipulation scenarios.
 
 ## 🚀 Quick Start
 
@@ -9,20 +9,17 @@ Impact-driven vulnerability discovery for Solidity smart contracts and DeFi prot
 cd codex-solidity
 npm install
 
-# Audit a local contract
-node bin/codex-sol.js audit -t ./contracts/Vault.sol
-
-# Audit a local project
-node bin/codex-sol.js audit -t ./contracts/
+# 🔴 Aggressive audit — prove every bug with exploit code
+node bin/codex-sol.js audit -t ./contracts/ --aggressive
 
 # Audit a GitHub repo directly (just provide the link!)
-node bin/codex-sol.js audit -t https://github.com/OpenZeppelin/openzeppelin-contracts
+node bin/codex-sol.js audit -t https://github.com/OpenZeppelin/openzeppelin-contracts --aggressive
 
 # Audit a GitHub subdirectory
-node bin/codex-sol.js audit -t https://github.com/Aave/aave-v3-core/tree/main/contracts
+node bin/codex-sol.js audit -t https://github.com/Aave/aave-v3-core/tree/main/contracts --aggressive
 
-# Audit with GPT-5.4 xhigh deep reasoning
-node bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh
+# 🔴 Full power: aggressive + GPT-5.4 xhigh reasoning
+node bin/codex-sol.js audit -t https://github.com/org/repo --aggressive --llm --reasoning-effort xhigh
 
 # Run a single skill
 node bin/codex-sol.js skill -t ./Vault.sol -n reentrancy
@@ -209,10 +206,58 @@ This produces:
 2. **Symbolic execution** → taint + data-flow findings
 3. **Invariant checker** → formal invariant violations
 4. **Cross-contract analyzer** → multi-file reentrancy chains
-5. **LLM validation** → true positives confirmed, false positives dismissed
-6. **LLM synthesis** → `llm-synthesis.md` with attack trees + recommendations
-7. **Foundry PoCs** → runnable `.t.sol` exploit tests
-8. **Fuzzing harnesses** → Echidna + Medusa configs
+5. **🔴 Exploit Engine** → PROVEN exploits with real attack code, chained attacks, broken invariants
+6. **LLM validation** → true positives confirmed, false positives dismissed
+7. **LLM synthesis** → `llm-synthesis.md` with attack trees + recommendations
+8. **Foundry PoCs** → runnable `.t.sol` exploit tests
+9. **Fuzzing harnesses** → Echidna + Medusa configs
+
+## 🔴 Aggressive Exploit Engine
+
+The `--aggressive` flag activates the Exploit Engine — it doesn't just FIND bugs, it PROVES them:
+
+| What It Does | How |
+|-------------|-----|
+| **Prove every finding** | Constructs real exploit code (Foundry `.t.sol`) for each vulnerability |
+| **Chain attacks** | Combines low/medium findings into critical exploit paths |
+| **Break invariants** | Actively tries to break `totalSupply == sum(balances)`, owner-only functions, shares-backed-by-assets |
+| **Flash loan simulation** | Simulates price manipulation attacks on every price-dependent function |
+| **Governance attack** | Simulates flash loan governance takeover |
+
+### Attack Chains Detected
+
+| Chain | Result |
+|-------|--------|
+| Read-only Reentrancy + Oracle Manipulation | Multi-protocol drain |
+| Access Control + Delegatecall | Full contract takeover |
+| Rounding Errors + Flash Loan | Vault drain |
+| Unchecked Returns + Reentrancy | Accounting break drain |
+| 2+ High findings | Compound critical exploit |
+
+### Usage
+
+```bash
+# Aggressive mode — prove every bug
+node bin/codex-sol.js audit -t https://github.com/org/repo --aggressive
+
+# Full power: aggressive + LLM reasoning
+node bin/codex-sol.js audit -t https://github.com/org/repo --aggressive --llm --reasoning-effort xhigh
+
+# Inside Codex CLI
+codex "aggressively audit https://github.com/org/repo — prove every exploit" --model gpt-5.4-pro
+```
+
+### Full Audit Pipeline
+
+```
+Phase 0: Fetch contracts from GitHub URL
+Phase 1: AST-parse all .sol files
+Phase 2: 34 skills scan (reentrancy, flash-loan, overflow, access-control, etc.)
+Phase 2B: Symbolic execution + Invariant checker + Cross-contract + Fuzzing
+Phase 2D: 🔴 Exploit Engine — PROVE bugs, chain attacks, break invariants
+Phase 2C: GPT-5.4 xhigh — validate findings, generate audit synthesis
+Phase 3: Reports (HTML + MD + JSON) + Foundry PoCs + Exploit code + Fuzzing harnesses
+```
 
 ## 📋 Skills (34 Impact-Driven Modules)
 
@@ -310,6 +355,7 @@ codex-solidity/
 │   ├── cross-contract-analyzer.js # Multi-file reentrancy chains, composability, state deps
 │   ├── llm-reasoner.js       # GPT-5.4 xhigh: finding validation, audit synthesis, exploit PoC
 │   ├── github-fetcher.js     # Fetch contracts from GitHub URLs (repo/tree/blob/raw)
+│   ├── exploit-engine.js     # 🔴 Aggressive: prove exploits, chain attacks, break invariants
 │   └── report-generator.js    # HTML (dark) + Markdown + JSON reports
 ├── skills/
 │   ├── reentrancy/index.js    # Reentrancy — recursive callback fund drain
