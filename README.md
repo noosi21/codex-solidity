@@ -123,6 +123,11 @@ codex-solidity/
 │   ├── ci-integration.js      # CI mode, SARIF output, GitHub Actions workflow generator
 │   ├── diff-auditor.js        # Git diff: only audit changed functions between refs
 │   ├── interactive-mode.js    # REPL: drill into findings, re-score, generate PoCs
+│   ├── symbolic-executor.js   # Symbolic execution: taint analysis, data-flow, path constraints
+│   ├── fuzzing-engine.js      # Echidna + Medusa harness generator, invariant derivation
+│   ├── invariant-checker.js   # Formal invariant verification (access, accounting, reentrancy)
+│   ├── shared-state.js        # Cross-skill shared state: skills read each other's findings in real-time
+│   ├── cross-contract-analyzer.js # Multi-file reentrancy chains, composability, state deps
 │   └── report-generator.js    # HTML (dark) + Markdown + JSON reports
 ├── skills/
 │   ├── reentrancy/index.js    # Reentrancy — recursive callback fund drain
@@ -199,6 +204,15 @@ import -i, --input <path>     Import findings from Slither/Aderyn/Mythril JSON
 
 ci-workflow                      Generate GitHub Actions workflow YAML
 
+fuzz    -t, --target <path>     Generate Echidna + Medusa fuzzing harnesses
+       -o, --output <dir>      Output directory for harnesses
+
+symbolic -t, --target <path>    Run symbolic execution (taint + data-flow + path constraints)
+
+invariant -t, --target <path>  Check formal invariants (access, accounting, reentrancy, overflow)
+
+cross-contract -t, --target <path> Analyze cross-contract interactions (reentrancy chains, composability)
+
 config                           Show current agent config (config.toml + AGENTS.md)
 ```
 
@@ -250,6 +264,11 @@ Durable instructions that persist across sessions:
 | **CI/CD Integration** | `--ci` flag with exit codes, SARIF output, GitHub Actions workflow generator |
 | **Diff Auditing** | `--diff main...HEAD` — only audits changed functions, skips untouched code |
 | **Interactive Mode** | `--interactive` REPL: drill into findings, re-score, generate PoCs, query MCP |
+| **Symbolic Execution** | Taint analysis: traces user input to dangerous sinks, data-flow: CEI violation detection, path constraints: bypassable guards |
+| **Fuzzing Engine** | Auto-derives invariants from contract structure, generates Echidna + Medusa harnesses with 10+ invariant types |
+| **Invariant Checker** | Certora-style formal verification: access control, accounting, reentrancy, overflow, state transition invariants |
+| **Shared State** | Skills share context during execution — real-time cross-skill awareness instead of post-hoc correlation |
+| **Cross-Contract Analyzer** | Multi-file reentrancy chains, callback reentrancy via ERC777/721 hooks, composability attacks, inheritance conflicts |
 
 ## 🔧 Adding Custom Skills
 

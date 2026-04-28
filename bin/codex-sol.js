@@ -231,4 +231,98 @@ program
     console.log(workflow);
   });
 
+program
+  .command('fuzz')
+  .description('Generate Echidna + Medusa fuzzing harnesses for contract invariants')
+  .requiredOption('-t, --target <path>', 'Path to Solidity file or project directory')
+  .option('-o, --output <dir>', 'Output directory for harnesses', './audit-reports/fuzz')
+  .action((opts) => {
+    console.log(BANNER);
+    const FuzzingEngine = require('../lib/fuzzing-engine');
+    const Parser = require('../lib/parser');
+    const parser = new Parser();
+    const fuzzer = new FuzzingEngine({ outputDir: opts.output });
+    const stat = fs.statSync(opts.target);
+    const results = stat.isDirectory() ? parser.parseProject(opts.target) : [parser.parseFile(opts.target)];
+    const harnesses = fuzzer.generateAll(results);
+    if (harnesses.length > 0) {
+      const manifest = fuzzer.save(harnesses);
+      console.log(chalk.cyan.bold(`\n🧪 Generated ${harnesses.length} fuzzing harness(es)\n`));
+      for (const h of manifest) {
+        console.log(`  ${chalk.green(h.contract)}: ${h.invariants} invariants`);
+        console.log(`    Echidna: ${chalk.gray(h.echidnaHarness)}`);
+        console.log(`    Medusa:  ${chalk.gray(h.medusaHarness)}`);
+      }
+      console.log(chalk.yellow('\nRun: echidna <harness.sol> --config echidna.yaml'));
+    } else {
+      console.log(chalk.yellow('No contracts found to generate harnesses for.'));
+    }
+    console.log();
+  });
+
+program
+  .command('symbolic')
+  .description('Run symbolic execution: taint analysis, data-flow, path constraints')
+  .requiredOption('-t, --target <path>', 'Path to Solidity file or project directory')
+  .action((opts) => {
+    console.log(BANNER);
+    const SymbolicExecutor = require('../lib/symbolic-executor');
+    const Parser = require('../lib/parser');
+    const parser = new Parser();
+    const symbolic = new SymbolicExecutor();
+    const stat = fs.statSync(opts.target);
+    const results = stat.isDirectory() ? parser.parseProject(opts.target) : [parser.parseFile(opts.target)];
+    const findings = symbolic.analyzeProject(results);
+    console.log(chalk.cyan.bold(`\n🧬 Symbolic Execution Results: ${findings.length} finding(s)\n`));
+    for (const f of findings) {
+      const color = { critical: 'red', high: 'red', medium: 'yellow', low: 'blue', info: 'gray' }[f.severity] || 'white';
+      console.log(`  ${chalk[color].bold(`[${f.severity.toUpperCase()}]`)} ${f.title}`);
+      if (f.evidence) console.log(`  ${chalk.gray('Evidence:')} ${f.evidence}`);
+    }
+    console.log();
+  });
+
+program
+  .command('invariant')
+  .description('Check formal invariants: access control, accounting, reentrancy, overflow')
+  .requiredOption('-t, --target <path>', 'Path to Solidity file or project directory')
+  .action((opts) => {
+    console.log(BANNER);
+    const InvariantChecker = require('../lib/invariant-checker');
+    const Parser = require('../lib/parser');
+    const parser = new Parser();
+    const checker = new InvariantChecker();
+    const stat = fs.statSync(opts.target);
+    const results = stat.isDirectory() ? parser.parseProject(opts.target) : [parser.parseFile(opts.target)];
+    const violations = checker.checkProject(results);
+    console.log(chalk.cyan.bold(`\n📐 Invariant Check Results: ${violations.length} violation(s)\n`));
+    for (const v of violations) {
+      const color = { critical: 'red', high: 'red', medium: 'yellow', low: 'blue', info: 'gray' }[v.severity] || 'white';
+      console.log(`  ${chalk[color].bold(`[${v.severity.toUpperCase()}]`)} ${v.title}`);
+      if (v.evidence) console.log(`  ${chalk.gray('Evidence:')} ${v.evidence}`);
+    }
+    console.log();
+  });
+
+program
+  .command('cross-contract')
+  .description('Analyze cross-contract interactions: reentrancy chains, composability, state deps')
+  .requiredOption('-t, --target <path>', 'Path to Solidity project directory')
+  .action((opts) => {
+    console.log(BANNER);
+    const CrossContractAnalyzer = require('../lib/cross-contract-analyzer');
+    const Parser = require('../lib/parser');
+    const parser = new Parser();
+    const analyzer = new CrossContractAnalyzer();
+    const results = parser.parseProject(opts.target);
+    const findings = analyzer.analyze(results);
+    console.log(chalk.cyan.bold(`\n🔗 Cross-Contract Analysis: ${findings.length} finding(s)\n`));
+    for (const f of findings) {
+      const color = { critical: 'red', high: 'red', medium: 'yellow', low: 'blue', info: 'gray' }[f.severity] || 'white';
+      console.log(`  ${chalk[color].bold(`[${f.severity.toUpperCase()}]`)} ${f.title}`);
+      if (f.contracts) console.log(`  ${chalk.gray('Contracts:')} ${f.contracts.join(' → ')}`);
+    }
+    console.log();
+  });
+
 program.parse();
