@@ -1,10 +1,21 @@
 # Codex Solidity — Agent Configuration
 # Professional-grade smart contract audit workstation
+# Works with OpenAI Codex CLI (codex command) or standalone
 
 [model]
 default = "gpt-5.4-pro"
 reasoning_effort = "xhigh"
 max_completion_tokens = 100000
+
+# Codex CLI integration
+# When running inside `codex` CLI, these settings are used automatically
+# Login: codex login
+# Run:   codex "audit https://github.com/org/repo" --model gpt-5.4-pro --reasoning-effort xhigh
+[codex_cli]
+model = "gpt-5.4-pro"
+reasoning_effort = "xhigh"
+approval_mode = "auto"          # auto-approve tool calls (audit scripts)
+sandbox = "relaxed"             # allow git clone, file writes, npm install
 
 [features]
 enable_subagents = true

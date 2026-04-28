@@ -65,7 +65,7 @@ fi
 echo -e "  Echidna: ${GREEN}$(echidna --version 2>/dev/null || echo 'not found — install manually')${NC}"
 
 # ─── 6. Codex Solidity ───
-echo -e "${CYAN}[6/7]${NC} Installing Codex Solidity..."
+echo -e "${CYAN}[6/8]${NC} Installing Codex Solidity..."
 if [ ! -d "$HOME/codex-solidity" ]; then
     git clone https://github.com/noosi21/codex-solidity.git "$HOME/codex-solidity"
 fi
@@ -73,8 +73,19 @@ cd "$HOME/codex-solidity"
 npm install --silent 2>/dev/null
 echo -e "  Codex Solidity: ${GREEN}installed${NC}"
 
-# ─── 7. OpenAI API Key ───
-echo -e "${CYAN}[7/7]${NC} Configuring LLM access..."
+# ─── 7. OpenAI Codex CLI ───
+echo -e "${CYAN}[7/8]${NC} Installing OpenAI Codex CLI..."
+if ! command -v codex &> /dev/null; then
+    npm install -g @openai/codex 2>/dev/null || true
+fi
+if command -v codex &> /dev/null; then
+    echo -e "  Codex CLI: ${GREEN}$(codex --version 2>/dev/null || echo 'installed')${NC}"
+else
+    echo -e "  Codex CLI: ${YELLOW}not found — install manually: npm install -g @openai/codex${NC}"
+fi
+
+# ─── 8. OpenAI API Key ───
+echo -e "${CYAN}[8/8]${NC} Configuring LLM access..."
 if [ -z "$OPENAI_API_KEY" ]; then
     echo -e "  ${YELLOW}OPENAI_API_KEY not set.${NC}"
     echo -ne "  Enter your OpenAI API key (or press Enter to skip): "
@@ -98,6 +109,7 @@ echo -e "${GREEN}═════════════════════
 echo ""
 echo -e "  ${CYAN}Quick Start:${NC}"
 echo ""
+echo "  # ─── Standalone Mode (Node.js CLI) ───"
 echo "  # Audit a local project:"
 echo "  node ~/codex-solidity/bin/codex-sol.js audit -t ./contracts/"
 echo ""
@@ -107,14 +119,21 @@ echo ""
 echo "  # Audit with GPT-5.4 xhigh reasoning:"
 echo "  node ~/codex-solidity/bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh"
 echo ""
-echo "  # Audit specific subdirectory on GitHub:"
-echo "  node ~/codex-solidity/bin/codex-sol.js audit -t https://github.com/org/repo/tree/main/contracts --llm"
+echo "  # ─── Codex CLI Mode (GPT-5.4 xhigh agent) ───"
+echo "  # Login to Codex CLI:"
+echo "  codex login"
 echo ""
-echo "  # Run individual analysis modules:"
-echo "  node ~/codex-solidity/bin/codex-sol.js symbolic -t ./contracts/"
-echo "  node ~/codex-solidity/bin/codex-sol.js invariant -t ./contracts/"
-echo "  node ~/codex-solidity/bin/codex-sol.js fuzz -t ./contracts/"
-echo "  node ~/codex-solidity/bin/codex-sol.js cross-contract -t ./contracts/"
+echo "  # Start an interactive audit session:"
+echo "  cd ~/codex-solidity && codex"
+echo ""
+echo "  # Then tell the agent what to audit:"
+echo "  > audit https://github.com/OpenZeppelin/openzeppelin-contracts"
+echo "  > run symbolic execution on the Vault contract"
+echo "  > check invariants on the Pool contract"
+echo "  > generate a fuzzing harness for the Token contract"
+echo ""
+echo "  # Or run one-shot:"
+echo "  codex \"audit https://github.com/org/repo for bug bounty\" --model gpt-5.4-pro --reasoning-effort xhigh"
 echo ""
 echo -e "  ${YELLOW}Set OPENAI_API_KEY to unlock GPT-5.4 xhigh deep reasoning${NC}"
 echo ""

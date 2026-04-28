@@ -60,13 +60,105 @@ This installs:
 - **Slither** — Python static analyzer
 - **Echidna** — property-based fuzzer
 - **Codex Solidity** + all npm dependencies
+- **OpenAI Codex CLI** (`codex` command) — GPT-5.4 xhigh agent
 - **OpenAI API key** configuration (prompts for key)
 
-After setup, audit any smart contract from GitHub:
+## 🤖 Codex CLI Integration (GPT-5.4 xhigh Agent)
+
+This project is designed to work **inside OpenAI Codex CLI** as an agentic audit workstation. The GPT-5.4 agent reads `AGENTS.md` for instructions and `.agents/skills/*/SKILL.md` for skill definitions, then executes our Node.js tools.
+
+### Setup
 
 ```bash
-# Just provide the GitHub link — no manual cloning needed
-node ~/codex-solidity/bin/codex-sol.js audit -t https://github.com/Uniswap/v3-core --llm --reasoning-effort xhigh
+# 1. Install Codex CLI
+npm install -g @openai/codex
+
+# 2. Login
+codex login
+
+# 3. Clone this repo
+git clone https://github.com/noosi21/codex-solidity.git
+cd codex-solidity
+npm install
+
+# 4. Start Codex CLI in the project directory
+codex
+```
+
+### Interactive Bug Bounty Workflow
+
+Once inside the Codex CLI REPL, just tell the agent what to audit:
+
+```
+> audit https://github.com/OpenZeppelin/openzeppelin-contracts
+
+> run symbolic execution on the Vault contract
+
+> check invariants on the Pool contract
+
+> generate a fuzzing harness for the Token contract
+
+> find reentrancy in all withdraw functions
+
+> what are the cross-contract risks between Pool and Router?
+```
+
+The GPT-5.4 xhigh agent will:
+1. Read `AGENTS.md` for audit persona + operational rules
+2. Read `.agents/skills/audit-pro/SKILL.md` for the audit workflow
+3. Execute `node bin/codex-sol.js audit -t <url>` to run the full pipeline
+4. Review findings, validate them with deep reasoning
+5. Write Foundry PoCs for confirmed vulnerabilities
+6. Format findings in Sherlock/Immunefi bug bounty submission format
+
+### One-Shot Mode
+
+```bash
+# Audit a repo in one command
+codex "audit https://github.com/Aave/aave-v3-core for bug bounty" --model gpt-5.4-pro --reasoning-effort xhigh
+
+# Focus on a specific vulnerability
+codex "find reentrancy in https://github.com/org/repo" --model gpt-5.4-pro
+
+# Generate PoC for a known issue
+codex "write a Foundry PoC for the flash loan vulnerability in ./contracts/Vault.sol"
+```
+
+### How It Works
+
+```
+┌─────────────────────────────────────────────────┐
+│              Codex CLI (GPT-5.4 xhigh)          │
+│  Reads AGENTS.md → Gets audit persona + rules   │
+│  Reads SKILL.md → Gets audit workflow steps     │
+├─────────────────────────────────────────────────┤
+│         Executes Node.js Tools via Shell         │
+│  node bin/codex-sol.js audit -t <url>           │
+│  node bin/codex-sol.js symbolic -t <path>       │
+│  node bin/codex-sol.js invariant -t <path>      │
+│  node bin/codex-sol.js cross-contract -t <path> │
+│  node bin/codex-sol.js fuzz -t <path>           │
+├─────────────────────────────────────────────────┤
+│         GPT-5.4 xhigh Deep Reasoning            │
+│  • Validates automated findings                  │
+│  • Finds novel vulnerabilities static tools miss │
+│  • Traces exploit paths step-by-step            │
+│  • Quantifies financial impact                  │
+│  • Generates Foundry PoCs                       │
+│  • Formats bug bounty submissions               │
+└─────────────────────────────────────────────────┘
+```
+
+### Standalone Mode (No Codex CLI)
+
+You can also use the Node.js CLI directly — no Codex CLI needed:
+
+```bash
+# Full audit with built-in LLM reasoning
+node bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh
+
+# Or without LLM — pure static analysis
+node bin/codex-sol.js audit -t ./contracts/
 ```
 
 ## 🤖 LLM Integration (GPT-5.4 xhigh)

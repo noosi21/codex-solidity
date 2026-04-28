@@ -1,47 +1,112 @@
 ---
 name: protocol-audit
-description: Triggers deep auditing of smart contracts (Solidity/Move) with invariant-breaking focus.
+description: Full smart contract audit using Codex CLI with 34 skills, symbolic execution, invariant checking, cross-contract analysis, and fuzzing. Designed for bug bounty programs.
 ---
 
-# Security Audit Workflow
+# Protocol Audit — Codex CLI Skill
 
-## Step 1: Reconnaissance
-- Parse all contracts, list public/external functions, identify privileged roles.
-- Map state variables, modifiers, events, and inheritance chains.
-- Identify the attack surface: payable functions, external calls, delegatecalls, assembly blocks.
-- Check pragma version and compiler settings.
+This skill is triggered when auditing smart contracts. It uses the Codex Solidity Node.js tools as the static analysis engine, while you (GPT-5.4 xhigh) provide deep reasoning and validation.
 
-## Step 2: Static Analysis
-- Run `./scripts/static_scan.sh` for automated pattern detection.
-- Analyze Slither/Aderyn output for known vulnerability patterns.
-- Cross-reference with SWC Registry for known weaknesses.
+## Step 1: Run Automated Audit
 
-## Step 3: Deep Skill Analysis
-- Execute all enabled skills against parsed contracts.
-- For each skill finding, validate with invariant checks:
-  - Is `totalSupply == sum(balances)` broken?
-  - Is `contract_balance >= total_deposits - total_withdrawals` broken?
-  - Is `only_owner_can_call_restricted_functions` broken?
-  - Is `shares_are_always_backed_by_assets` broken?
-- Prioritize invariant-breaking findings as Critical.
+```bash
+# GitHub URL — auto-clones and audits
+node bin/codex-sol.js audit -t https://github.com/org/repo
 
-## Step 4: Proof of Concept
-- For every High/Critical finding, generate a failing test case.
-- PoC must demonstrate: (1) initial state, (2) attacker action, (3) broken invariant, (4) financial impact.
-- If PoC fails to compile, debug the test environment first.
-- Use Foundry test format for Solidity PoCs.
+# Local path
+node bin/codex-sol.js audit -t ./contracts/
 
-## Step 5: Report Generation
-- Generate report in Sherlock/Immunefi format.
-- Include: Title, Severity, Description, Impact, Proof of Concept, Recommended Mitigation.
-- Quantify financial impact: "Attacker drains X ETH from pool of Y ETH."
-- Auto-fill submission template from `references/report_template.md`.
+# With LLM validation enabled
+node bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh
+```
 
-## Step 6: Gas/Compute Optimization Review
-- Analyze gas-intensive patterns that may indicate hidden logic flaws.
-- Check for: unnecessary storage reads, redundant computations, unbounded loops.
-- Optimization findings may reveal security issues (e.g., gas griefing vectors).
+This single command runs the full pipeline:
+- AST parsing of all `.sol` files
+- 34 vulnerability skills (reentrancy, flash-loan, overflow, access-control, etc.)
+- Symbolic execution (taint analysis, data-flow, path constraints)
+- Invariant checking (access control, accounting, reentrancy, overflow)
+- Cross-contract analysis (multi-file reentrancy chains, composability)
+- Fuzzing harness generation (Echidna + Medusa)
+- Dynamic severity scoring
+- Cross-skill correlation
+- Foundry PoC generation
+- Reports: HTML + Markdown + JSON in `./audit-reports/`
+
+## Step 2: Review Findings
+
+```bash
+# List generated reports
+ls ./audit-reports/
+
+# Read JSON findings
+cat ./audit-reports/audit-*.json | jq '.findings[] | {severity, title, evidence}'
+
+# Read LLM synthesis (if --llm was used)
+cat ./audit-reports/llm-synthesis.md
+```
+
+## Step 3: Deep Reasoning (Your Job)
+
+After the automated scan, use your GPT-5.4 reasoning to:
+1. **Validate findings**: Are the automated findings true positives? Read the source code and verify.
+2. **Find novel vulnerabilities**: Static tools catch known patterns. You catch novel logic flaws.
+3. **Trace exploit paths**: Walk through the code step-by-step to confirm exploitability.
+4. **Assess cross-contract impact**: How do findings interact across contracts?
+5. **Quantify impact**: Calculate exact fund drain amounts, affected TVL percentage.
+
+## Step 4: Run Specialized Engines
+
+For deeper investigation on specific areas:
+
+```bash
+# Symbolic execution — trace user input to dangerous sinks
+node bin/codex-sol.js symbolic -t ./contracts/
+
+# Invariant checker — verify security invariants hold
+node bin/codex-sol.js invariant -t ./contracts/
+
+# Cross-contract — find multi-file reentrancy chains
+node bin/codex-sol.js cross-contract -t ./contracts/
+
+# Fuzzing — generate Echidna/Medusa harnesses
+node bin/codex-sol.js fuzz -t ./contracts/
+
+# Single skill — focus on one vulnerability type
+node bin/codex-sol.js skill -t ./Vault.sol -n reentrancy
+
+# MCP intelligence — query SWC Registry / DeFiLlama
+node bin/codex-sol.js mcp -q "reentrancy" -s swc
+node bin/codex-sol.js mcp -q "aave" -s defillama
+
+# External tool import — bring in Slither/Aderyn findings
+node bin/codex-sol.js import -i slither-output.json -t slither
+```
+
+## Step 5: Generate PoC
+
+For every confirmed High/Critical finding, write a Foundry test:
+
+```bash
+# Check existing PoCs generated by the tool
+ls ./audit-reports/pocs/
+
+# Write additional PoCs using Foundry format
+# Template: .agents/skills/audit-pro/references/report_template.md
+```
+
+## Step 6: Format Bug Bounty Submission
+
+Use the report template at `references/report_template.md`.
+
+Required format for Sherlock/Immunefi:
+1. Title with severity
+2. Description of the logic flaw
+3. Impact quantification (ETH amount, TVL %, affected users)
+4. Proof of Concept (Foundry test)
+5. Attack flow (step-by-step)
+6. Recommended mitigation with code fix
 
 ## Triggers
-- Automatically starts when `.sol` files are detected in the target directory.
-- Can be manually triggered with: `codex-sol audit -t <path>`
+- Automatically starts when `.sol` files are detected in the workspace
+- Can be manually triggered with: `node bin/codex-sol.js audit -t <path_or_url>`
+- Triggered when user mentions: "audit", "review", "find bugs", "bug bounty", "security check"
