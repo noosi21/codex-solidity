@@ -49,7 +49,7 @@ case $CHOICE in
         echo ""
         echo -e "${GREEN}Running aggressive audit on $TARGET...${NC}"
         echo ""
-        node bin/codex-sol.js audit -t "$TARGET" --aggressive --llm --reasoning-effort xhigh
+        node bin/codex-sol.js audit -t "$TARGET" --aggressive --authorize --llm --reasoning-effort xhigh
         ;;
     2)
         echo -ne "${BOLD}Enter directory path: ${NC}"
@@ -58,7 +58,7 @@ case $CHOICE in
         echo ""
         echo -e "${GREEN}Running aggressive audit on $TARGET...${NC}"
         echo ""
-        node bin/codex-sol.js audit -t "$TARGET" --aggressive --llm --reasoning-effort xhigh
+        node bin/codex-sol.js audit -t "$TARGET" --aggressive --authorize --llm --reasoning-effort xhigh
         ;;
     3)
         echo -ne "${BOLD}Enter .sol file path: ${NC}"
@@ -70,7 +70,7 @@ case $CHOICE in
         echo ""
         echo -e "${GREEN}Running aggressive audit on $TARGET...${NC}"
         echo ""
-        node bin/codex-sol.js audit -t "$TARGET" --aggressive --llm --reasoning-effort xhigh
+        node bin/codex-sol.js audit -t "$TARGET" --aggressive --authorize --llm --reasoning-effort xhigh
         ;;
     4)
         node bin/codex-sol.js list

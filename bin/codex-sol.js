@@ -50,6 +50,7 @@ program
   .option('--reasoning-effort <level>', 'Reasoning effort: low, medium, high, xhigh (default: high)', 'high')
   .option('--api-key <key>', 'OpenAI API key (or set OPENAI_API_KEY env var)', '')
   .option('--aggressive', 'Aggressive mode: prove every bug with exploit code, chain attacks, break invariants')
+  .option('--authorize', 'Confirm you have authorization to audit this target (required for live/deployed contracts)')
   .action(async (opts) => {
     console.log(BANNER);
     const agent = new Agent(opts);
