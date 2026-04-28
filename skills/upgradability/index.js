@@ -8,17 +8,11 @@
  * - Missing __gap for inheritance
  */
 
-const Skill = require('../skill-base');
-
-class UpgradabilitySkill extends Skill {
-  constructor() {
-    super({
-      name: 'upgradability',
-      description: 'Proxy upgradability — uninitialized proxy, missing initializer, storage collision, UUPS issues',
-      severity: 'critical',
-    });
-  }
-
+module.exports = {
+  name: 'upgradability',
+  aliases: ['proxy-upgrade', 'upgradeable', 'uups', 'transparent-proxy'],
+  severity: 'critical',
+  description: 'Proxy upgradability — uninitialized proxy, missing initializer, UUPS issues, storage collision, self-destruct',
   async execute(ctx) {
     const findings = [];
     const { contracts } = ctx;
@@ -170,6 +164,4 @@ class UpgradabilitySkill extends Skill {
 
     return findings;
   }
-}
-
-module.exports = new UpgradabilitySkill();
+};
