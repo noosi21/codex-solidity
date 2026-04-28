@@ -111,11 +111,18 @@ node bin/codex-sol.js config
 codex-solidity/
 ├── bin/codex-sol.js           # CLI entry (commander)
 ├── lib/
-│   ├── agent.js               # 3-phase orchestrator: parse → skills → report
-│   ├── parser.js              # Solidity regex parser (contracts, functions, state vars, events)
+│   ├── agent.js               # Orchestrator: parse → skills → correlate → PoC → report
+│   ├── parser.js              # AST parser (@solidity-parser/parser) + regex fallback
 │   ├── skill-loader.js        # Auto-discovers skills from /skills
 │   ├── impact-engine.js       # Calculates drain amounts, generates exploit contracts
 │   ├── mcp.js                 # MCP: SWC Registry + DeFiLlama intelligence
+│   ├── foundry-poc.js         # Auto-generates Foundry .t.sol exploit test cases
+│   ├── correlation-engine.js  # Cross-skill correlation: links combined exploit paths
+│   ├── dynamic-severity.js    # Context-aware severity scoring (TVL, visibility, exploitability)
+│   ├── external-tool-parser.js # Normalizes Slither/Aderyn/Mythril JSON into Codex format
+│   ├── ci-integration.js      # CI mode, SARIF output, GitHub Actions workflow generator
+│   ├── diff-auditor.js        # Git diff: only audit changed functions between refs
+│   ├── interactive-mode.js    # REPL: drill into findings, re-score, generate PoCs
 │   └── report-generator.js    # HTML (dark) + Markdown + JSON reports
 ├── skills/
 │   ├── reentrancy/index.js    # Reentrancy — recursive callback fund drain
@@ -176,9 +183,21 @@ audit  -t, --target <path>     Path to .sol file or directory (required)
        --compiler <version>    Solidity version (default: 0.8.19)
        --network <name>        Network context (default: mainnet)
        --exclude <list>        Paths to exclude
+       --ci                    CI mode: non-zero exit if findings above threshold
+       --fail-on <severity>    CI fail threshold: critical, high, medium (default: high)
+       --diff <ref>            Diff mode: only audit changed functions (e.g. main...HEAD)
+       --interactive           Interactive REPL: drill into findings after audit
 
 mcp    -q, --query <query>     Search SWC Registry / DeFiLlama for known exploits
        -s, --source <source>   Source: swc, defillama, all (default: all)
+
+diff   -b, --base <ref>        Base git ref (branch, commit, tag)
+       -h, --head <ref>        Head git ref (default: working tree)
+
+import -i, --input <path>     Import findings from Slither/Aderyn/Mythril JSON
+       -t, --tool <name>       Tool: slither, aderyn, mythril, auto (default: auto)
+
+ci-workflow                      Generate GitHub Actions workflow YAML
 
 config                           Show current agent config (config.toml + AGENTS.md)
 ```
@@ -218,6 +237,19 @@ Durable instructions that persist across sessions:
 - **SKILL.md**: 6-step audit workflow (Recon → Static Analysis → Deep Skill Analysis → PoC → Report → Gas Review)
 - **scripts/static_scan.sh**: Bridges Codex with Slither, Aderyn, and custom patterns
 - **references/report_template.md**: Sherlock/Immunefi submission-ready template
+
+### 🆕 Engine Upgrades
+
+| Module | What It Does |
+|--------|-------------|
+| **AST Parser** | Real AST via `@solidity-parser/parser` — catches nested calls, modifiers, inheritance that regex misses |
+| **Foundry PoC Generator** | Auto-generates runnable `.t.sol` exploit tests for every critical/high finding |
+| **Cross-Skill Correlation** | Detects combined exploits (e.g., read-only reentrancy + oracle = $100M+ class) |
+| **Dynamic Severity** | Scores severity based on fund exposure, exploitability, access vector, state impact, cross-protocol reach |
+| **External Tool Parser** | Imports Slither/Aderyn/Mythril JSON findings into unified Codex format |
+| **CI/CD Integration** | `--ci` flag with exit codes, SARIF output, GitHub Actions workflow generator |
+| **Diff Auditing** | `--diff main...HEAD` — only audits changed functions, skips untouched code |
+| **Interactive Mode** | `--interactive` REPL: drill into findings, re-score, generate PoCs, query MCP |
 
 ## 🔧 Adding Custom Skills
 

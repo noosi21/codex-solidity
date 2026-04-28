@@ -41,6 +41,10 @@ program
   .option('--compiler <version>', 'Solidity compiler version (e.g. 0.8.19)', '0.8.19')
   .option('--network <name>', 'Target network for context (mainnet, goerli, fork)', 'mainnet')
   .option('--exclude <list>', 'Comma-separated paths to exclude', '')
+  .option('--ci', 'CI mode: exit with non-zero code if findings above threshold')
+  .option('--fail-on <severity>', 'CI fail threshold: critical, high, medium, low', 'high')
+  .option('--diff <ref>', 'Diff mode: only audit changed functions (e.g. main...HEAD)')
+  .option('--interactive', 'Interactive REPL mode: drill into findings after audit')
   .action(async (opts) => {
     console.log(BANNER);
     const agent = new Agent(opts);
@@ -175,6 +179,56 @@ program
       console.log(chalk.yellow('  No AGENTS.md found.'));
     }
     console.log();
+  });
+
+program
+  .command('diff')
+  .description('Show diff audit summary: changed files and functions between refs')
+  .requiredOption('-b, --base <ref>', 'Base git ref (branch, commit, tag)')
+  .option('-h, --head <ref>', 'Head git ref (default: working tree)')
+  .action((opts) => {
+    console.log(BANNER);
+    const DiffAuditor = require('../lib/diff-auditor');
+    const diff = new DiffAuditor();
+    const summary = diff.getDiffSummary(opts.base, opts.head);
+    console.log(chalk.cyan.bold('\n📊 Diff Audit Summary\n'));
+    console.log(`  Base: ${summary.baseRef}`);
+    console.log(`  Head: ${summary.headRef}`);
+    console.log(`  Changed Solidity files: ${summary.changedFiles}`);
+    for (const f of summary.solFiles) console.log(`    ${chalk.gray(f)}`);
+    console.log(`  Modified functions: ${summary.changedFunctions}`);
+    console.log(`  Changed state vars: ${summary.changedStateVars}`);
+    console.log(`  High-risk (public/external/payable): ${summary.highRiskChanges}`);
+    console.log(chalk.gray(`\n  ${summary.summary}`));
+    console.log();
+  });
+
+program
+  .command('import')
+  .description('Import findings from external tools (Slither, Aderyn, Mythril)')
+  .requiredOption('-i, --input <path>', 'Path to external tool JSON output')
+  .option('-t, --tool <name>', 'Tool name: slither, aderyn, mythril, auto', 'auto')
+  .action((opts) => {
+    console.log(BANNER);
+    const ExternalToolParser = require('../lib/external-tool-parser');
+    const parser = new ExternalToolParser();
+    const findings = parser.parseFile(opts.input);
+    console.log(chalk.cyan.bold(`\n📋 Imported ${findings.length} findings from ${opts.input}\n`));
+    for (const f of findings) {
+      const color = { critical: 'red', high: 'red', medium: 'yellow', low: 'blue', info: 'gray' }[f.severity] || 'white';
+      console.log(`  ${chalk[color].bold(`[${f.severity.toUpperCase()}]`)} ${f.title} (${f.source})`);
+    }
+    console.log();
+  });
+
+program
+  .command('ci-workflow')
+  .description('Generate GitHub Actions workflow for CI audit')
+  .action(() => {
+    const CIIntegration = require('../lib/ci-integration');
+    const ci = new CIIntegration();
+    const workflow = ci.generateGitHubActionsWorkflow();
+    console.log(workflow);
   });
 
 program.parse();

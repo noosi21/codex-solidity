@@ -10,10 +10,24 @@
     "start": "node bin/codex-sol.js",
     "test": "node bin/codex-sol.js --help"
   },
-  "keywords": ["solidity", "smart-contract", "audit", "blockchain", "defi", "security", "cli", "trail-of-bits", "erc4626", "reentrancy", "mcp", "bug-bounty"],
+  "keywords": [
+    "solidity",
+    "smart-contract",
+    "audit",
+    "blockchain",
+    "defi",
+    "security",
+    "cli",
+    "trail-of-bits",
+    "erc4626",
+    "reentrancy",
+    "mcp",
+    "bug-bounty"
+  ],
   "author": "Thabiso Noosi",
   "license": "MIT",
   "dependencies": {
+    "@solidity-parser/parser": "^0.20.2",
     "chalk": "^4.1.2",
     "commander": "^11.1.0",
     "glob": "^10.3.10",
