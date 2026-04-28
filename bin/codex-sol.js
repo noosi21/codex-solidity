@@ -49,6 +49,7 @@ program
   .option('--llm-model <model>', 'LLM model to use (default: gpt-4o, use gpt-5.4-pro when available)', '')
   .option('--reasoning-effort <level>', 'Reasoning effort: low, medium, high, xhigh (default: high)', 'high')
   .option('--api-key <key>', 'OpenAI API key (or set OPENAI_API_KEY env var)', '')
+  .option('--aggressive', 'Aggressive mode: prove every bug with exploit code, chain attacks, break invariants')
   .action(async (opts) => {
     console.log(BANNER);
     const agent = new Agent(opts);

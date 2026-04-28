@@ -1,62 +1,71 @@
 ---
 name: protocol-audit
-description: Full smart contract audit using Codex CLI with 34 skills, symbolic execution, invariant checking, cross-contract analysis, and fuzzing. Designed for bug bounty programs.
+description: Aggressive smart contract audit — find bugs before hackers do. Prove every exploit, chain every attack, break every invariant. Designed for bug bounty programs.
 ---
 
-# Protocol Audit — Codex CLI Skill
+# 🔴 Protocol Audit — Aggressive Attack Mode
 
-This skill is triggered when auditing smart contracts. It uses the Codex Solidity Node.js tools as the static analysis engine, while you (GPT-5.4 xhigh) provide deep reasoning and validation.
+You are a **WHITE-HAT ATTACKER**. Your job is to find bugs BEFORE hackers exploit them. Be aggressive. Prove every finding with a working exploit. Chain low-severity findings into critical attack paths. Break every invariant you can think of.
 
 ## Step 1: Run Automated Audit
 
 ```bash
 # GitHub URL — auto-clones and audits
-node bin/codex-sol.js audit -t https://github.com/org/repo
+node bin/codex-sol.js audit -t https://github.com/org/repo --aggressive
 
-# Local path
-node bin/codex-sol.js audit -t ./contracts/
+# Local path with aggressive exploit engine
+node bin/codex-sol.js audit -t ./contracts/ --aggressive
 
-# With LLM validation enabled
-node bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh
+# With GPT-5.4 xhigh reasoning + aggressive mode
+node bin/codex-sol.js audit -t https://github.com/org/repo --llm --reasoning-effort xhigh --aggressive
 ```
 
-This single command runs the full pipeline:
-- AST parsing of all `.sol` files
-- 34 vulnerability skills (reentrancy, flash-loan, overflow, access-control, etc.)
-- Symbolic execution (taint analysis, data-flow, path constraints)
-- Invariant checking (access control, accounting, reentrancy, overflow)
-- Cross-contract analysis (multi-file reentrancy chains, composability)
-- Fuzzing harness generation (Echidna + Medusa)
-- Dynamic severity scoring
-- Cross-skill correlation
-- Foundry PoC generation
-- Reports: HTML + Markdown + JSON in `./audit-reports/`
+This runs the full pipeline including the **Exploit Engine** (Phase 2D):
+- 34 vulnerability skills → find every pattern
+- Symbolic execution → trace user input to dangerous sinks
+- Invariant checker → verify security invariants hold
+- Cross-contract analysis → find multi-file reentrancy chains
+- **Exploit Engine** → PROVE every bug with real exploit code
+- **Attack chaining** → combine low/medium findings into critical paths
+- **Invariant breaking** → actively try to break every invariant
+- **Flash loan simulation** → simulate price manipulation attacks
+- **Governance attack simulation** → simulate flash loan governance takeovers
+- Foundry PoC generation → runnable exploit tests
+- Fuzzing harness generation → Echidna + Medusa configs
 
-## Step 2: Review Findings
+## Step 2: Review PROVEN Exploits
 
 ```bash
-# List generated reports
-ls ./audit-reports/
+# List proven exploits
+ls ./audit-reports/exploits/
 
-# Read JSON findings
-cat ./audit-reports/audit-*.json | jq '.findings[] | {severity, title, evidence}'
+# Read exploit manifest
+cat ./audit-reports/exploits/exploit-manifest.json | jq '.[] | select(.severity=="critical")'
 
-# Read LLM synthesis (if --llm was used)
+# Read LLM synthesis
 cat ./audit-reports/llm-synthesis.md
 ```
 
-## Step 3: Deep Reasoning (Your Job)
+## Step 3: Deep Attack Reasoning (Your Job)
 
 After the automated scan, use your GPT-5.4 reasoning to:
-1. **Validate findings**: Are the automated findings true positives? Read the source code and verify.
-2. **Find novel vulnerabilities**: Static tools catch known patterns. You catch novel logic flaws.
-3. **Trace exploit paths**: Walk through the code step-by-step to confirm exploitability.
-4. **Assess cross-contract impact**: How do findings interact across contracts?
-5. **Quantify impact**: Calculate exact fund drain amounts, affected TVL percentage.
+1. **Validate exploits**: Are the automated exploits actually exploitable? Read the source code and verify.
+2. **Find NOVEL attacks**: The tools catch known patterns. You catch novel logic flaws that no scanner can find.
+3. **Trace exploit paths**: Walk through the code step-by-step. Think: "If I were attacking this, what would I do?"
+4. **Chain attacks**: Can two medium findings combine into a critical drain? Look for compound exploits.
+5. **Quantify impact**: Calculate EXACT fund drain amounts, TVL at risk, affected users.
 
-## Step 4: Run Specialized Engines
+### Attack Questions to Ask Yourself
+- Can I drain the entire pool? How?
+- Can I freeze everyone's funds? How?
+- Can I withdraw more than I deposited? How?
+- Can I become the owner? How?
+- Can I manipulate the oracle? How?
+- Can I re-enter during a state update? How?
+- Can I exploit rounding to accumulate value? How?
+- Can I use a flash loan to amplify this attack? How?
 
-For deeper investigation on specific areas:
+## Step 4: Run Specialized Attack Engines
 
 ```bash
 # Symbolic execution — trace user input to dangerous sinks
@@ -76,21 +85,17 @@ node bin/codex-sol.js skill -t ./Vault.sol -n reentrancy
 
 # MCP intelligence — query SWC Registry / DeFiLlama
 node bin/codex-sol.js mcp -q "reentrancy" -s swc
-node bin/codex-sol.js mcp -q "aave" -s defillama
-
-# External tool import — bring in Slither/Aderyn findings
-node bin/codex-sol.js import -i slither-output.json -t slither
 ```
 
-## Step 5: Generate PoC
+## Step 5: Write Foundry PoC for EVERY Finding
 
-For every confirmed High/Critical finding, write a Foundry test:
+Every High/Critical finding MUST have a working Foundry exploit test:
 
 ```bash
-# Check existing PoCs generated by the tool
+# Check existing PoCs
 ls ./audit-reports/pocs/
 
-# Write additional PoCs using Foundry format
+# Write additional PoCs
 # Template: .agents/skills/audit-pro/references/report_template.md
 ```
 
@@ -102,11 +107,11 @@ Required format for Sherlock/Immunefi:
 1. Title with severity
 2. Description of the logic flaw
 3. Impact quantification (ETH amount, TVL %, affected users)
-4. Proof of Concept (Foundry test)
+4. Proof of Concept (Foundry test that DRAINS FUNDS)
 5. Attack flow (step-by-step)
 6. Recommended mitigation with code fix
 
 ## Triggers
 - Automatically starts when `.sol` files are detected in the workspace
-- Can be manually triggered with: `node bin/codex-sol.js audit -t <path_or_url>`
-- Triggered when user mentions: "audit", "review", "find bugs", "bug bounty", "security check"
+- Can be manually triggered with: `node bin/codex-sol.js audit -t <path_or_url> --aggressive`
+- Triggered when user mentions: "audit", "review", "find bugs", "bug bounty", "security check", "exploit", "attack"
